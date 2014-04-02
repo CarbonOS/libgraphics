@@ -1,0 +1,144 @@
+#include <stdio.h>
+#include "graphics.h"
+#include "device.h"
+
+/* Enumerate adapter (video card) outputs (displays). */
+extern "C" int EnumDisplays(AdapterPtr pAdapter, int index, DisplayPtr *ppDisplay)
+{
+	IAdapter *iadapter;
+	if ((iadapter = (IAdapter*)pAdapter) == NULL)
+	{
+		return GI_ERROR;
+	}
+
+	if ((iadapter->EnumDisplays == NULL))
+	{
+		return GI_UNIMPLEMENTED;
+	}
+
+	if ((iadapter->EnumDisplays(iadapter, index, (IDisplay**)ppDisplay) != GI_SUCCESS))
+	{
+		return GI_ERROR;
+	}
+
+	return GI_SUCCESS;
+}
+
+/* Enumerate all Properties supported by an connected display. */
+extern "C" int EnumProperties(DisplayPtr pDisplay, int index)
+{
+	IDisplay *idisplay;
+	if ((idisplay = (IDisplay*)pDisplay) == NULL)
+	{
+		return GI_ERROR;
+	}
+
+	if ((idisplay->EnumProperties == NULL))
+	{
+		return GI_UNIMPLEMENTED;
+	}
+
+	return idisplay->EnumProperties(idisplay, index);
+}
+
+/* Enumerate adapter (video card) outputs (displays). */
+extern "C" int GetDisplayInfo(DisplayPtr pDisplay, DisplayInfo *pInfo)
+{
+	IDisplay *idisplay;
+	if ((idisplay = (IDisplay*)pDisplay) == NULL)
+	{
+		return GI_ERROR;
+	}
+
+	if ((idisplay->GetDisplayInfo == NULL))
+	{
+		return GI_UNIMPLEMENTED;
+	}
+
+	return idisplay->GetDisplayInfo(idisplay, pInfo);
+}
+
+/* Get the Surface object for the Display. */
+extern "C" int GetDisplaySurface(DisplayPtr pDisplay, SurfacePtr *ppSurface)
+{
+	IDisplay *idisplay;
+	if ((idisplay = (IDisplay*)pDisplay) == NULL)
+		return GI_ERROR;
+
+	if ((idisplay->GetSurface == NULL))
+		return GI_UNIMPLEMENTED;
+
+	if ((idisplay->GetSurface(idisplay, (ISurface**)ppSurface) != GI_SUCCESS))
+		return GI_ERROR;
+
+	return GI_SUCCESS;
+}
+
+/* Summary */
+extern "C" int GetDisplayAdapter(DisplayPtr pDisplay, AdapterPtr *ppAdapter)
+{
+	IDisplay *idisplay;
+	if ((idisplay = (IDisplay*)pDisplay) == NULL)
+	{
+		return GI_ERROR;
+	}
+
+	if ((idisplay->GetAdapter == NULL))
+	{
+		return GI_UNIMPLEMENTED;
+	}
+
+	if ((idisplay->GetAdapter(idisplay, (IAdapter**)ppAdapter) != GI_SUCCESS))
+	{
+		return GI_ERROR;
+	}
+
+	return GI_SUCCESS;
+}
+
+/* Halt a thread until the next vertical blank occurs. */
+extern "C" int WaitForVBlank(DisplayPtr pDisplay)
+{
+	IDisplay *idisplay;
+	if ((idisplay = (IDisplay*)pDisplay) == NULL)
+	{
+		return GI_ERROR;
+	}
+
+	if ((idisplay->WaitForVBlank == NULL))
+	{
+		return GI_UNIMPLEMENTED;
+	}
+
+	if ((idisplay->WaitForVBlank(idisplay) != GI_SUCCESS))
+	{
+		return GI_ERROR;
+	}
+
+	return GI_SUCCESS;
+}
+
+/* Summary */
+extern "C" int ReleaseDisplay(DisplayPtr pDisplay)
+{
+	IDisplay *idisplay;
+	if ((idisplay = (IDisplay*)pDisplay) == NULL)
+	{
+		return GI_ERROR;
+	}
+
+	if ((idisplay->Release == NULL))
+	{
+		return GI_UNIMPLEMENTED;
+	}
+
+	if ((idisplay->Release(idisplay) != GI_SUCCESS))
+	{
+		return GI_ERROR;
+	}
+
+	return GI_SUCCESS;
+}
+
+
+

@@ -1,0 +1,129 @@
+#include <stdio.h>
+#include "graphics.h"
+#include "device.h"
+
+/* Creates a Surface object for the Device. */
+extern "C" int CreateSurface(DevicePtr pDevice, SurfacePtr *ppSurface, int width, int height, int format)
+{
+	IDevice *idevice;
+	if ((idevice = (IDevice*)pDevice) == NULL)
+	{
+		return GI_ERROR;
+	}
+
+	if ((ppSurface == NULL) || (width <= 0) || (height <= 0))
+	{
+		return GI_ERROR;
+	}
+
+	if ((idevice->CreateSurface == NULL))
+	{
+		return GI_UNIMPLEMENTED;
+	}
+
+	if ((idevice->CreateSurface(idevice, (ISurface**)ppSurface, width, height, format) != GI_SUCCESS))
+	{
+		return GI_ERROR;
+	}
+
+	return GI_SUCCESS;
+}
+
+extern "C" int CreateDisplaySurface(DevicePtr pDevice, DisplayInfo *info, SurfacePtr *ppSurface)
+{
+	IDevice *idevice;
+	if ((idevice = (IDevice*)pDevice) == NULL)
+		return GI_ERROR;
+
+	if ((ppSurface == NULL) || (info == NULL))
+		return GI_ERROR;
+
+	if ((idevice->CreateDisplaySurface == NULL))
+		return GI_UNIMPLEMENTED;
+
+	if ((idevice->CreateDisplaySurface(idevice, info, (ISurface**)ppSurface) != GI_SUCCESS))
+		return GI_ERROR;
+
+	return GI_SUCCESS;
+}
+
+extern "C" int GetSurfaceInfo(SurfacePtr pSurface, SurfaceInfo *pInfo)
+{
+	ISurface *isurface;
+	if ((isurface = (ISurface*)pSurface) == NULL)
+		return GI_ERROR;
+
+	if ((pInfo == NULL))
+		return GI_ERROR;
+
+	pInfo->width = isurface->width;
+	pInfo->height = isurface->height;
+	return GI_SUCCESS;
+}
+
+extern "C" int GetSurfaceHandle(SurfacePtr pSurface, unsigned *handle)
+{
+	ISurface *isurface;
+	if ((isurface = (ISurface*)pSurface) == NULL)
+		return GI_ERROR;
+
+	if ((isurface->GetHandle == NULL))
+		return GI_UNIMPLEMENTED;
+
+	if ((isurface->GetHandle(isurface, handle) != GI_SUCCESS))
+		return GI_ERROR;
+
+	return GI_SUCCESS;
+}
+
+/* Get a pointer to the data contained in the surface. */
+extern "C" int MapSurface(SurfacePtr pSurface, void **ptr)
+{
+	ISurface *isurface;
+	if ((isurface = (ISurface*)pSurface) == NULL)
+	{
+		return GI_ERROR;
+	}
+
+	if ((isurface->Map == NULL))
+	{
+		return GI_UNIMPLEMENTED;
+	}
+
+	return (isurface->Map(isurface, ptr));
+}
+
+/* Summary */
+extern "C" int UnmapSurface(SurfacePtr pSurface, void *ptr)
+{
+	ISurface *isurface;
+	if ((isurface = (ISurface*)pSurface) == NULL)
+	{
+		return GI_ERROR;
+	}
+
+	if ((isurface->Unmap == NULL))
+	{
+		return GI_UNIMPLEMENTED;
+	}
+
+	return (isurface->Unmap(isurface));
+}
+
+/* Release a surface object. */
+extern "C" int ReleaseSurface(SurfacePtr pSurface)
+{
+	ISurface *isurface;
+	if ((isurface = (ISurface*)pSurface) == NULL)
+	{
+		return GI_ERROR;
+	}
+
+	if ((isurface->Release == NULL))
+	{
+		return GI_UNIMPLEMENTED;
+	}
+
+	return (isurface->Release(isurface));
+}
+

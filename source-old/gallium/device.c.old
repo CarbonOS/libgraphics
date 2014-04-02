@@ -1,0 +1,72 @@
+#include <stdio.h>
+#include <graphics.h>
+#include <device.h>
+#include "private.h"
+
+/* Summary */
+static int galReleaseDevice(IDevice *pDevice)
+{
+	GIDevice *idevice = NULL;
+	if ((idevice = (GIDevice*)pDevice) == NULL)
+		return GI_ERROR;
+
+	if (idevice->context != NULL)
+	{
+		IContextDestroy(idevice->context);
+	}
+
+	if (idevice->screen != NULL)
+	{
+		idevice->screen->destroy(idevice->screen);
+	}
+
+	free(idevice);
+	return GI_SUCCESS;
+}
+
+/* Summary */
+int galCreateDeviceContext(IAdapter *pAdapter, IDevice **ppDevice)
+{
+	if ((pAdapter == NULL) || (ppDevice == NULL))
+	{
+		return GI_ERROR;
+	}
+
+	if ((pAdapter->CreatePipeline == NULL))
+	{
+		printf("CreatePipeline::Unimplemented!\n");
+		return GI_UNIMPLEMENTED;
+	}
+
+	struct pipe_screen *screen = NULL;
+	if (pAdapter->CreatePipeline(pAdapter, (void**)&screen) != GI_SUCCESS)
+	{
+		printf("CreatePipeline::failed!\n");
+		return GI_ERROR;
+	}
+
+	struct pipe_context *context = NULL;
+	if ((context = ICreateContext(screen, (void*)pAdapter)) == NULL)
+	{
+		printf("context_create::Failed!\n");
+		return GI_ERROR;
+	}
+
+	GIDevice *idevice = NULL;
+	if ((idevice = (GIDevice*)calloc(1, sizeof(GIDevice))) == NULL)
+	{
+		return GI_ERROR;
+	}
+
+/*
+	idevice->screen = screen;
+	idevice->context = context;
+	idevice->base.CreateSurface = galCreateSurface;
+	idevice->base.CreateDisplaySurface = galCreateDisplaySurface;
+	idevice->base.CreateContext = galCreateContext;
+	idevice->base.Release = galReleaseDevice;
+	(*ppDevice) = &idevice->base;
+*/
+	return GI_SUCCESS;
+}
+

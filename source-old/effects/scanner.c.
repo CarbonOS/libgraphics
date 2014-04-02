@@ -1,0 +1,183 @@
+#include <stdio.h>
+#include <string.h>
+#include "compiler.h"
+
+static int IsEOF(IScanner *scanner, int peek)
+{
+	if (strlen(scanner->text) <= peek)
+                return 1;
+	return 0;
+}
+
+static int Peek(IScanner *scanner, int count)
+{
+	if (IsEOF(scanner, count))
+		return -1;
+	return (int)scanner->text[count];
+}
+
+static int Read(IScanner *scanner)
+{
+	++scanner->col;
+
+	if (IsEOF(scanner, 0))
+		return -1;
+
+	int code = (int)scanner->text[0];
+	scanner->text++;
+	return code;
+}
+
+static int SkipTo(IScanner *scanner, int code)
+{
+	int peek = -1;
+	while ((peek = Peek(scanner, 1)) != code)
+	{
+		Read(scanner);
+	}
+
+	return 1;
+}
+
+static int IsNext(IScanner *scanner, int c)
+{
+	if (Peek(scanner, 1) != c)
+	{
+		return 0;
+	}
+
+	Read(scanner);
+	return 1;
+}
+
+static char* GetString(IScanner *scanner, int length)
+{ 
+//	if (IsEOF(scanner, length))
+//		return 0;
+
+	return (scanner->text + scanner->offset);
+} 
+
+static int Skip(IScanner *scanner)
+{
+	int code = 0;
+	while ((code = Peek(scanner, 0)) != -1)
+	{
+		switch (code)
+		{
+		    case ' ':
+		    case '\t':
+			Read(scanner);
+			continue;
+		    case '\r':
+		    case '\n':
+			Read(scanner);
+			scanner->col = 1;
+			scanner->line++;
+			continue;
+		    default:
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+static int IsDigit(int code)
+{
+	if ((code >= '0') && (code <= '9'))
+		return 1;
+	return 0;
+}
+
+static int IsOperator(int code)
+{
+	if (code == '+' ||
+		code == '-' ||
+		code == '*' ||
+		/* code == '/' || */
+		code == '^' ||
+		code == '&' ||
+		code == '>' ||
+		code == '<' ||
+		code == '=' )
+		return 1;
+    return 0;
+}
+
+static int ParseDigit(IScanner *scanner, IToken *token)
+{
+	int code = Peek(scanner, 0);
+	if (!IsDigit(code))
+		return 0;
+
+	int index = 0;
+	while (IsDigit(Peek(scanner, 0)))
+	{
+		Read(scanner);
+		index++;
+	}
+
+	token->code = 1;
+	token->i_value = 0;
+	printf("%s\n", scanner->text);
+
+	return 1;
+}
+
+static int ParseDigit2(IScanner *scanner, IToken *token)
+{
+	int code = Peek(scanner, 0);
+	if (!IsDigit(code))
+		return 0;
+
+	int index = 0;
+	while (IsDigit(Peek(scanner, 0)))
+	{
+		Read(scanner);
+		index++;
+	}
+
+	token->code = 1;
+	token->i_value = 0;
+	printf("%s\n", scanner->text);
+
+	return 1;
+}
+
+int ScannerInit(IScanner *scanner, const char *text)
+{
+	if ((scanner == NULL))
+	{
+		return -1;
+	}
+
+	if ((text == NULL) || (strlen(text) <= 0))	
+	{
+		return -1;
+	}
+
+	scanner->col = 0;
+	scanner->line = 0;
+	scanner->text = text;
+	scanner->length = strlen(text);
+//	scanner->offset = 0;
+
+	return 0;
+}
+
+int GetNextToken(IScanner *scanner, IToken *token)
+{
+	if ((scanner == NULL) || (token == NULL))
+	{
+		return 0;
+	}
+
+	Skip(scanner);
+	if (ParseDigit(scanner, token))
+		return 1;
+
+	token->code = 0;
+	return 0;
+}
+
