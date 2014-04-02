@@ -25,7 +25,7 @@
 
 /* Locals */
 static DEFINE_LIST(devlist);
-HELLO
+
 static int GetResources(struct IDevice *device)
 {
 	struct drm_mode_card_res res;
